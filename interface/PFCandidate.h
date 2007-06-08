@@ -47,8 +47,8 @@ namespace reco {
     virtual ~PFCandidate() {}
 
     /// return a clone
-    PFCandidate * clone() const;
-
+    virtual PFCandidate * clone() const;
+    
     /// particle identification
     virtual int particleId() const { return particleId_;}
     
@@ -58,7 +58,7 @@ namespace reco {
 
     /// return reference to the block
     PFBlockRef block() const { return blockRef_; } 
-
+    
     friend std::ostream& operator<<( std::ostream& out, 
 				     const PFCandidate& c );
     
