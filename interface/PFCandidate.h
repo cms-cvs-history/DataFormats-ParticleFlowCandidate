@@ -10,6 +10,7 @@
 
 #include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include "DataFormats/ParticleFlowReco/interface/PFBlockFwd.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
 
 namespace reco {
   /**\class PFCandidate
@@ -38,10 +39,12 @@ namespace reco {
     PFCandidate(Charge q, 
 		const LorentzVector & p4, 
 		ParticleType particleId, 
-		reco::PFBlockRef blockref ) : 
+		reco::PFBlockRef blockref, 
+		const std::vector<unsigned>& elementIndices ) : 
       LeafCandidate(q, p4), 
       particleId_(particleId), 
-      blockRef_(blockref) {}
+      blockRef_(blockref),
+      elementIndices_(elementIndices) {}
     
     /// destructor
     virtual ~PFCandidate() {}
@@ -54,8 +57,17 @@ namespace reco {
     
 
     /// return reference to the block
-    const reco::PFBlockRef & blockRef() const { return blockRef_; } 
+    const reco::PFBlockRef& blockRef() const { return blockRef_; } 
+    
+    /// return a reference to the corresponding track, if charged. 
+    /// otherwise, return a null reference
+    reco::TrackRef trackRef() const;
 
+    /// return indices of elements used in the block
+    const std::vector<unsigned>& elementIndices() const { 
+      return elementIndices_;
+    }
+    
     /// return reference to the block
     PFBlockRef block() const { return blockRef_; } 
     
@@ -66,10 +78,14 @@ namespace reco {
   private:
     
     /// particle identification
-    ParticleType particleId_; 
+    ParticleType            particleId_; 
     
     /// reference to the corresponding PFBlock
-    reco::PFBlockRef blockRef_;
+    reco::PFBlockRef        blockRef_;
+
+    /// indices of the elements used in the PFBlock
+    std::vector<unsigned>   elementIndices_;
+    
   };
 
   /// particle ID component tag
