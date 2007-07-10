@@ -39,8 +39,9 @@ namespace reco {
     PFCandidate(Charge q, 
 		const LorentzVector & p4, 
 		ParticleType particleId, 
-		reco::PFBlockRef blockref, 
-		const std::vector<unsigned>& elementIndices ) : 
+		reco::PFBlockRef blockref
+/* 		, const std::vector<unsigned>& elementIndices  */
+		) : 
       LeafCandidate(q, p4), 
       particleId_(particleId), 
       blockRef_(blockref)
