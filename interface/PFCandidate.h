@@ -43,8 +43,9 @@ namespace reco {
 		const std::vector<unsigned>& elementIndices ) : 
       LeafCandidate(q, p4), 
       particleId_(particleId), 
-      blockRef_(blockref),
-      elementIndices_(elementIndices) {}
+      blockRef_(blockref)
+/*       ,elementIndices_(elementIndices)  */
+      {}
     
     /// destructor
     virtual ~PFCandidate() {}
@@ -61,12 +62,12 @@ namespace reco {
     
     /// return a reference to the corresponding track, if charged. 
     /// otherwise, return a null reference
-    reco::TrackRef trackRef() const;
+/*     reco::TrackRef trackRef() const; */
 
     /// return indices of elements used in the block
-    const std::vector<unsigned>& elementIndices() const { 
-      return elementIndices_;
-    }
+/*     const std::vector<unsigned>& elementIndices() const {  */
+/*       return elementIndices_; */
+/*     } */
     
     /// return reference to the block
     PFBlockRef block() const { return blockRef_; } 
@@ -84,7 +85,7 @@ namespace reco {
     reco::PFBlockRef        blockRef_;
 
     /// indices of the elements used in the PFBlock
-    std::vector<unsigned>   elementIndices_;
+/*     std::vector<unsigned>   elementIndices_; */
     
   };
 
