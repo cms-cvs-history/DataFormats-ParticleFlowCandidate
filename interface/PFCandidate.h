@@ -8,15 +8,10 @@
 
 #include <iostream>
 
-#include "DataFormats/Candidate/interface/CompositeCandidate.h"
+#include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include "DataFormats/ParticleFlowReco/interface/PFBlockFwd.h"
-#include "DataFormats/ParticleFlowReco/interface/PFBlock.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
-#include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
-// necessary ?
-#include "DataFormats/VertexReco/interface/NuclearInteraction.h"
-#include "DataFormats/VertexReco/interface/NuclearInteractionFwd.h"
 
 namespace reco {
   /**\class PFCandidate
@@ -25,7 +20,7 @@ namespace reco {
      \author Colin Bernet
      \date   February 2007
   */
-  class PFCandidate : public CompositeCandidate {
+  class PFCandidate : public LeafCandidate {
 
   public:
     
@@ -41,48 +36,23 @@ namespace reco {
 
     /// default constructor
     PFCandidate();
-
-    /// constructor from a reference (keeps track of parent relationship)
-    PFCandidate( const PFCandidateRef& parentRef );
     
-    /*     PFCandidate( Charge q,  */
-    /*                  const LorentzVector & p4,  */
-    /*                  ParticleType particleId,  */
-    /*                  reco::PFBlockRef blockRef ); */
     PFCandidate( Charge q, 
-                 const LorentzVector & p4, 
-                 ParticleType particleId );
+		 const LorentzVector & p4, 
+		 ParticleType particleId, 
+		 reco::PFBlockRef blockRef );
 
     /// destructor
     virtual ~PFCandidate() {}
 
     /// return a clone
     virtual PFCandidate * clone() const;
-
-    /// return a reference to the parent PFCandidate
-    const PFCandidateRef& parent() const { return parent_;}
-
-    /// returns the pdg id corresponding to the particle type.
-    /// the particle type could be removed at some point to gain some space.
-    /// low priority
-    int     translateTypeToPdgId( ParticleType type ) const;
- 
     
-    /// add an element to the current PFCandidate
-    /*     void addElement( const reco::PFBlockElement* element ); */
-    
-    /// add element in block
-    void addElementInBlock( const reco::PFBlockRef& blockref,
-                            unsigned elementIndex );
-
     /// set track reference
     void    setTrackRef(const reco::TrackRef& ref);
 
     /// set muon reference
     void    setMuonRef(const reco::MuonRef& ref);
-
-    /// set nuclear interaction reference
-    void    setNuclearRef(const reco::NuclearInteractionRef& ref);
 
     /// set corrected Ecal energy 
     void    setEcalEnergy( float ee ) {ecalEnergy_ = ee;}
@@ -177,7 +147,7 @@ namespace reco {
     virtual int particleId() const { return particleId_;}
     
     /// return reference to the block
-    /*     const reco::PFBlockRef& blockRef() const { return blockRef_; }  */
+    const reco::PFBlockRef& blockRef() const { return blockRef_; } 
 
     /// return a reference to the corresponding track, if charged. 
     /// otherwise, return a null reference
@@ -187,32 +157,20 @@ namespace reco {
     /// otherwise, return a null reference
     reco::MuonRef muonRef() const { return muonRef_; }    
 
-    /// return a reference to the corresponding nuclear interaction,
-    /// otherwise, return a null reference
-    reco::NuclearInteractionRef nuclearRef() const { return nuclearRef_; }
-
     
     /// return indices of elements used in the block
     /*     const std::vector<unsigned>& elementIndices() const {  */
     /*       return elementIndices_; */
     /*     } */
-    /// return elements
-    /*     const edm::OwnVector< reco::PFBlockElement >& elements() const  */
-    /*       {return elements_;} */
-
-    /// return elements in blocks
-    typedef std::pair<reco::PFBlockRef, unsigned> ElementInBlock;
-    typedef std::vector< ElementInBlock > ElementsInBlocks;
-    const ElementsInBlocks& elementsInBlocks() const { 
-      return elementsInBlocks_;
-    }
     
+    /// return reference to the block
+    PFBlockRef block() const { return blockRef_; } 
   
 
     static const float bigMva_;
 
     friend std::ostream& operator<<( std::ostream& out, 
-                                     const PFCandidate& c );
+				     const PFCandidate& c );
   
   private:
     void setFlag(unsigned shift, unsigned flag, bool value);
@@ -222,17 +180,15 @@ namespace reco {
     /// particle identification
     ParticleType            particleId_; 
     
-  
-    ElementsInBlocks elementsInBlocks_;
+    /// reference to the corresponding PFBlock
+    reco::PFBlockRef        blockRef_;
 
-    /// reference to the parent PFCandidate, if any
-    PFCandidateRef parent_;
+    /// indices of the elements used in the PFBlock
+    /*     std::vector<unsigned>   elementIndices_; */
 
     reco::TrackRef trackRef_;
     
     reco::MuonRef  muonRef_;
-
-    reco::NuclearInteractionRef nuclearRef_;
     
     /// corrected ECAL energy
     float        ecalEnergy_;
@@ -276,7 +232,7 @@ namespace reco {
 
   /// get default PFBlockRef component
   /// as: pfcand->get<PFBlockRef>();
-  /*   GET_DEFAULT_CANDIDATE_COMPONENT( PFCandidate, PFBlockRef, block ); */
+  GET_DEFAULT_CANDIDATE_COMPONENT( PFCandidate, PFBlockRef, block );
 
   /// get int component
   /// as: pfcand->get<int, PFParticleIdTag>();

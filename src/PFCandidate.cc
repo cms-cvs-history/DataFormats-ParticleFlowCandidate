@@ -27,25 +27,18 @@ PFCandidate::PFCandidate() :
   mva_pi_mu_(-PFCandidate::bigMva_),
   mva_nothing_gamma_(-PFCandidate::bigMva_),
   mva_nothing_nh_(-PFCandidate::bigMva_),
-  mva_gamma_nh_(-PFCandidate::bigMva_) {
-  
-  setPdgId( translateTypeToPdgId( particleId_ ) );
-}
-
-
-PFCandidate::PFCandidate( const PFCandidateRef& parentRef ) {
-  *this = *parentRef;
-  parent_ = parentRef;
-}
+  mva_gamma_nh_(-PFCandidate::bigMva_)
+{}
 
 
 PFCandidate::PFCandidate( Charge charge, 
 			  const LorentzVector & p4, 
-			  ParticleType particleId ) : 
+			  ParticleType particleId, 
+			  reco::PFBlockRef blockRef ) : 
   
-  CompositeCandidate(charge, p4), 
+  LeafCandidate(charge, p4), 
   particleId_(particleId), 
-//   blockRef_(blockRef), 
+  blockRef_(blockRef), 
   ecalEnergy_(0),
   hcalEnergy_(0),
   ps1Energy_(-1),
@@ -73,7 +66,7 @@ PFCandidate::PFCandidate( Charge charge,
       string err;
       err+="Attempt to construct a charged PFCandidate with a zero charge";
       throw cms::Exception("InconsistentValue",
-                           err.c_str() );
+			   err.c_str() );
     } 
   }
   else {
@@ -85,36 +78,13 @@ PFCandidate::PFCandidate( Charge charge,
 			   err.c_str() );
     } 
   }
-  setPdgId( translateTypeToPdgId( particleId_ ) );
 }
-
 
 
 PFCandidate * PFCandidate::clone() const {
   return new PFCandidate( * this );
 }
 
-
-void PFCandidate::addElementInBlock( const reco::PFBlockRef& blockref,
-                                     unsigned elementIndex ) {
-  elementsInBlocks_.push_back( make_pair(blockref, elementIndex) );
-}
-
-
-int PFCandidate::translateTypeToPdgId( ParticleType type ) const {
-  
-  int thecharge = charge();
-  
-  switch( type ) {
-  case h:     return thecharge*211; // pi+
-  case e:     return thecharge*11;
-  case mu:    return thecharge*13;
-  case gamma: return 22;
-  case h0:    return 130; // K_L0
-  case X: 
-  default:    return 0;  
-  }
-}
 
 void PFCandidate::setTrackRef(const reco::TrackRef& ref) {
   if(!charge()) {
@@ -166,29 +136,6 @@ void PFCandidate::setMuonRef(const reco::MuonRef& ref) {
   muonRef_ = ref;
 }
 
-void PFCandidate::setNuclearRef(const reco::NuclearInteractionRef& ref) {
-
-  if( particleId_ != h ) {
-    string err;
-    err += "PFCandidate::setNuclearRef: this is not a hadron! particleId_=";
-    char num[4];
-    sprintf( num, "%d", particleId_);
-    err += num;
-
-    throw cms::Exception("InconsistentReference",
-                         err.c_str() );
-  }
-  else if(  !flag( T_FROM_NUCLINT ) && !flag( T_TO_NUCLINT ) ) {
-    string err;
-    err += "PFCandidate::setNuclearRef: particule flag is neither T_FROM_NUCLINT nor T_TO_NUCLINT";
-
-    throw cms::Exception("InconsistentReference",
-                         err.c_str() );
-  }
-
-  nuclearRef_ = ref;
-}
-
 
 void PFCandidate::rescaleMomentum( double rescaleFactor ) {
   LorentzVector rescaledp4 = p4();
@@ -224,25 +171,19 @@ ostream& reco::operator<<(ostream& out,
   out<<setiosflags(ios::right);
   out<<setiosflags(ios::fixed);
   out<<setprecision(3);
-  out<<" E/pT/eta/phi " 
-     <<c.energy()<<"/"
-     <<c.pt()<<"/"
-     <<c.eta()<<"/"
-     <<c.phi();
-  if( c.flag( PFCandidate::T_FROM_NUCLINT ) ) out<<", T_FROM_NUCL" << endl;
-  else if( c.flag( PFCandidate::T_TO_NUCLINT ) ) out<<", T_TO_NUCL" << endl;
-//   PFBlockRef blockRef = c.block(); 
-//   int blockid = blockRef.key(); 
-//   const edm::OwnVector< reco::PFBlockElement >& elements = c.elements();
-//   out<< "\t# of elements " << elements.size() 
-//      <<" from block " << blockid << endl;
-
-//   // print each element in turn
+  out<<" ( pT="<<setw(7)<<c.pt();
+  out<<", E ="<<setw(7)<<c.energy()<<" ) ";
+  out<<", iele = unknown";
   
-//   for(unsigned ie=0; ie<elements.size(); ie++) {
-//     out<<"\t"<< elements[ie] <<endl;
-//   }
+  //   for(unsigned i=0; i<c.elementIndices_.size(); i++) {
+  //     out<<c.elementIndices_[0]<<" ";
+  //   }
+  //   out<<endl;
   
   out<<resetiosflags(ios::right|ios::fixed);
+  
+  //  out<< *(c.blockRef_)<<endl;
+  
   return out;
 }
+
