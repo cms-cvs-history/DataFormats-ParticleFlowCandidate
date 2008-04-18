@@ -57,14 +57,26 @@ namespace reco {
     /// set corrected Ecal energy 
     void    setEcalEnergy( float ee ) {ecalEnergy_ = ee;}
 
+    /// return corrected Ecal energy
+    double ecalEnergy() const { return ecalEnergy_;}
+
     /// set corrected Hcal energy 
     void    setHcalEnergy( float eh ) {hcalEnergy_ = eh;}
+
+    /// return corrected Hcal energy
+    double hcalEnergy() const { return hcalEnergy_;}
 
     /// set corrected PS1 energy
     void    setPs1Energy( float e1 ) {ps1Energy_ = e1;}
 
+    /// return corrected PS1 energy
+    double pS1Energy() const { return ps1Energy_;}
+
     /// set corrected PS2 energy 
     void    setPs2Energy( float e2 ) {ps2Energy_ = e2;}
+
+    /// return corrected PS2 energy
+    double pS2Energy() const { return ps2Energy_;}
 
     /// particle momentum *= rescaleFactor
     void    rescaleMomentum( double rescaleFactor );
