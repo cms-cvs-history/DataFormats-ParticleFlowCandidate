@@ -120,7 +120,7 @@ int PFCandidate::translateTypeToPdgId( ParticleType type ) const {
 
 void PFCandidate::setParticleType( ParticleType type ) {
   particleId_ = type;
-  translateTypeToPdgId( type );
+  setPdgId( translateTypeToPdgId( type ) );
 }
 
 
