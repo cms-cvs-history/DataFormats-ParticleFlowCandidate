@@ -65,16 +65,7 @@ namespace reco {
     virtual PFCandidate * clone() const;
 
 
- /*    /// set source ref */
-/*     void setSourceRef(const PFCandidateRef& ref) { sourceRef_ = ref; } */
-
-/*     size_type numberOfSourceCandidateRefs() const {return 1;} */
-
-/*     CandidateBaseRef sourceCandidateRef( size_type i ) const { */
-/*       return  CandidateBaseRef(sourceRef_); */
-/*     } */
-
-    void setSourcePtr(const PFCandidatePtr& ptr) { sourcePtr_ = ptr; }
+    void setSourceCandidatePtr(const PFCandidatePtr& ptr) { sourcePtr_ = ptr; }
 
     size_t numberOfSourceCandidatePtrs() const { 
       return 1;
