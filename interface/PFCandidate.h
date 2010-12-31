@@ -16,6 +16,7 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrackFwd.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 
 #include "DataFormats/ParticleFlowReco/interface/PFDisplacedVertexFwd.h"
 #include "DataFormats/EgammaCandidates/interface/ConversionFwd.h"
@@ -168,6 +169,8 @@ namespace reco {
     /// return a reference to the original conversion
     reco::VertexCompositeCandidateRef v0Ref() const { return v0Ref_; }
 
+    /// return a reference to the corresponding GsfElectron if any
+    reco::GsfElectronRef gsfElectronRef() const {return gsfElectronRef_;} 
 
     /// set corrected Ecal energy 
     void setEcalEnergy( float ee ) {ecalEnergy_ = ee;}
@@ -189,6 +192,9 @@ namespace reco {
     
     /// set corrected Hcal energy 
     void setRawHcalEnergy( float eh ) {rawHcalEnergy_ = eh;}
+
+    /// set GsfElectronRef 
+    void setGsfElectronRef (const reco::GsfElectronRef & ref) {gsfElectronRef_ = ref; }
 
     /// return corrected Hcal energy
     double rawHcalEnergy() const { return rawHcalEnergy_;}
@@ -389,7 +395,10 @@ namespace reco {
 
     // Reference to a mother V0
     reco::VertexCompositeCandidateRef v0Ref_;
-    
+
+
+    // Reference to the corresponding GsfElectron if any
+    reco::GsfElectronRef gsfElectronRef_;
   };
 
   /// particle ID component tag
