@@ -37,7 +37,9 @@
   <class name="std::vector<reco::PFCandidateFwdPtr>"/>
 
   <class name="reco::PFCandidateElectronExtra">
+<!-- 
   <field name="mvaVariables_" transient="true"/>
+-->
   </class>
   <class name="std::vector<reco::PFCandidateElectronExtra>"/>
   <class name="edm::Wrapper<std::vector<reco::PFCandidateElectronExtra> >"/>

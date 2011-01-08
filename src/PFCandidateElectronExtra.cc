@@ -1,5 +1,7 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateElectronExtra.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
+#include <ostream>
+#include <iomanip>
 
 using namespace reco;
 
@@ -10,8 +12,9 @@ PFCandidateElectronExtra::PFCandidateElectronExtra() {
   hadEnergy_ = -9999. ;
   sigmaEtaEta_ = -9999.;
 
-  mvaVariables_.resize(15);
-  
+  for(MvaVariable m=MVA_FIRST; m<MVA_LAST; m=MvaVariable(m+1))
+    mvaVariables_.push_back(-9999.);
+      
   gsfTrackRef_ = GsfTrackRef();
   kfTrackRef_ = TrackRef();
 }
@@ -23,7 +26,9 @@ PFCandidateElectronExtra::PFCandidateElectronExtra(const reco::GsfTrackRef& gsfT
   hadEnergy_ = -9999. ;
   sigmaEtaEta_ = -9999.;
 
-  mvaVariables_.resize(15);
+  for(MvaVariable m=MVA_FIRST; m<MVA_LAST; m=MvaVariable(m+1))
+    mvaVariables_.push_back(-9999.);
+      
   gsfTrackRef_ = gsfTrack;
   kfTrackRef_ = TrackRef();
   
@@ -50,8 +55,15 @@ void PFCandidateElectronExtra::setGsfTrackPout(const math::XYZTLorentzVector& po
 
 void PFCandidateElectronExtra::setKfTrackRef(const reco::TrackRef & ref){
   kfTrackRef_ = ref;
-  setVariable(MVA_NhitsKf,kfTrackRef_->hitPattern().trackerLayersWithMeasurement());
-  setVariable(MVA_Chi2Kf,kfTrackRef_->normalizedChi2());
+  float nhit_kf=0;
+  float chi2_kf=-0.01;
+  // if the reference is null, it does not mean that the variables have not been set
+  if(kfTrackRef_.isNonnull()) {
+    nhit_kf=(float)kfTrackRef_->hitPattern().trackerLayersWithMeasurement();
+    chi2_kf=kfTrackRef_->normalizedChi2();
+  }
+  setVariable(MVA_NhitsKf,nhit_kf);
+  setVariable(MVA_Chi2Kf,chi2_kf);
 }
 
 void PFCandidateElectronExtra::setLateBrem(float val) {
@@ -75,6 +87,12 @@ void PFCandidateElectronExtra::setSigmaEtaEta(float val) {
   setVariable(MVA_LogSigmaEtaEta,val);
 }
 
+void PFCandidateElectronExtra::setDeltaEta(float val) {
+  deltaEta_ = val;
+  setVariable(MVA_DeltaEtaTrackCluster,val);
+}
+
+
 void PFCandidateElectronExtra::setClusterEnergies(const std::vector<float>& energies){
   clusterEnergies_=energies;
 
@@ -87,6 +105,7 @@ void PFCandidateElectronExtra::setClusterEnergies(const std::vector<float>& ener
   
   float etot=0;
   unsigned size=clusterEnergies_.size();
+  //  std::cout << " N clusters "  << size << std::endl;
   float ebrem=0.;
   for(unsigned ic=0;ic<size;++ic) {    
     etot+=clusterEnergies_[ic];
@@ -95,15 +114,21 @@ void PFCandidateElectronExtra::setClusterEnergies(const std::vector<float>& ener
   }
   setVariable(MVA_EtotOverPin,etot/Ein_gsf);
   setVariable(MVA_EbremOverDeltaP,ebrem/(Ein_gsf-pout_.t()));  
+
+  // recompute - as in PFElectronAglo, the had energy is filled before the cluster energies
+  if(hadEnergy_!=-9999.)
+    setHadEnergy(hadEnergy_);
+
 }
 
-
+void PFCandidateElectronExtra::setMVA(float val) {
+  setVariable(MVA_MVA,val);
+}
 
 void PFCandidateElectronExtra::setVariable(MvaVariable type,float val) {
-  if(!type) return;
   
-  mvaVariables_[type-1]=val;
-  mvaStatus_ |= (1 << (type-1)) ;    
+  mvaVariables_[type]=val;
+  mvaStatus_ |= (1 << (type)) ;    
 }
 
 
@@ -118,4 +143,46 @@ void PFCandidateElectronExtra::setStatus(StatusFlag type,bool status){
 
 bool PFCandidateElectronExtra::electronStatus(StatusFlag flag) const {
   return status_ & (1<<flag) ;
+}
+
+bool PFCandidateElectronExtra::mvaStatus(MvaVariable flag) const {
+  return mvaStatus_ & (1<< (flag)) ;
+}
+
+float PFCandidateElectronExtra::mvaVariable(MvaVariable var) const {
+  return (mvaStatus(var) ? mvaVariables_[var] : -9999. );
+}
+
+#include <string>
+
+std::ostream& reco::operator<<(std::ostream& out, 
+			       const PFCandidateElectronExtra& extra ) { 
+  if(!out) return out;
+
+  static std::vector<std::string> listVar;
+  if(listVar.size()==0) {
+    listVar.push_back("LogPt");
+    listVar.push_back("Eta");
+    listVar.push_back("SigmaPtOverPt");
+    listVar.push_back("fbrem");
+    listVar.push_back("Chi2Gsf");
+    listVar.push_back("NhitsKf");
+    listVar.push_back("Chi2Kf");
+    listVar.push_back("EtotOverPin");
+    listVar.push_back("EseedOverPout");
+    listVar.push_back("EbremOverDeltaP");
+    listVar.push_back("DeltaEtaTrackCluster");
+    listVar.push_back("LogSigmaEtaEta");
+    listVar.push_back("H/(H+E)");
+    listVar.push_back("LateBrem");
+    listVar.push_back("FirstBrem");
+    listVar.push_back("MVA");
+  }
+  out <<  std::setiosflags(std::ios::left)<<  std::setw(20) << "Variable index" << std::setw(20) << "Name"  << std::setw(10) << "Set(0/1)" << std::setw(8) << "value" << std::endl;  
+  for(  PFCandidateElectronExtra::MvaVariable i=PFCandidateElectronExtra::MVA_FIRST;
+	i<PFCandidateElectronExtra::MVA_LAST;i=PFCandidateElectronExtra::MvaVariable(i+1)) {
+    out << std::setw(20)<< i <<  std::setw(20) << listVar[i] << std::setw(10) << extra.mvaStatus(i) << std::setw(8) << extra.mvaVariable(i) << std::endl;
+  }
+  
+  return out;
 }

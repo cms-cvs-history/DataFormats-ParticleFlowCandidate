@@ -5,6 +5,7 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrackFwd.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 
+#include <iosfwd>
 
 namespace reco {
 /** \class reco::PFCandidateElectronExtra
@@ -21,10 +22,11 @@ namespace reco {
       MVASelected,                    // Passed the internal particle-flow selection (mva selection)
       Rejected                        // Rejected 
     };
-    
+
+    // if you had a variable update NMvaVariables 
     enum MvaVariable {
-      NONE=0,
-      MVA_LnPtGsf,
+      MVA_FIRST=0,
+      MVA_LnPtGsf=MVA_FIRST,
       MVA_EtaGsf,
       MVA_SigmaPtOverPt,
       MVA_Fbrem,
@@ -38,7 +40,9 @@ namespace reco {
       MVA_LogSigmaEtaEta,
       MVA_HOverHE,
       MVA_LateBrem,
-      MVA_FirstBrem 
+      MVA_FirstBrem,
+      MVA_MVA,
+      MVA_LAST
     };
 
 
@@ -56,9 +60,11 @@ namespace reco {
     /// set kf track reference
     void setKfTrackRef(const reco::TrackRef & ref);
 
-    /// return a reference to the corresponding GSF track, if an electron. 
-    /// otherwise, return a null reference 
+    /// return a reference to the corresponding GSF track
     reco::GsfTrackRef gsfTrackRef() const { return gsfTrackRef_; }     
+
+    /// return a reference to the corresponding KF track
+    reco::TrackRef kfTrackRef() const { return kfTrackRef_; }     
 
     /// set LateBrem
     void setLateBrem(float val); 
@@ -74,14 +80,29 @@ namespace reco {
     /// set the sigmaetaeta
     void setSigmaEtaEta(float val);
 
+    /// set the delta eta
+    void setDeltaEta(float val);
+
     /// set the had energy. The cluster energies should be entered before
     void setHadEnergy(float val);
+
+    /// set the result (mostly for debugging)
+    void setMVA(float val);
 
     /// set status 
     void setStatus(StatusFlag type,bool status=true);
 
     /// access to the status
     bool electronStatus(StatusFlag) const ;
+
+    /// access to mva variable status
+    bool mvaStatus(MvaVariable flag) const;
+
+    /// access to the mva variables
+    const std::vector<float> & mvaVariables() const {return mvaVariables_;}
+
+    /// access to any variable
+    float mvaVariable(MvaVariable var) const;
 
  private:
     void  setVariable(MvaVariable type,float var);
@@ -110,8 +131,11 @@ namespace reco {
     float lateBrem_;
     float sigmaEtaEta_;
     float hadEnergy_;
-
+    float deltaEta_;
   };
+
+  /// print the variables
+  std::ostream& operator<<( std::ostream& out, const PFCandidateElectronExtra& c );
 
 }
 #endif
